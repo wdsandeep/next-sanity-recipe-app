@@ -26,7 +26,7 @@ export default function OneRecipe({data, preview}) {
     const router = useRouter()
 
     const { data: recipe } = usePreviewSubscription(recipeQuery, {
-        params: { slug: data.recipe?.slug.current },
+        params: { slug: data?.recipe?.slug?.current },
         initialData: data,
         enabled: preview
     });
@@ -41,7 +41,7 @@ export default function OneRecipe({data, preview}) {
     const addLike = async () => {
         const res = await fetch("/api/handle-like",{
             method: "POST",
-            body: JSON.stringify({ _id: recipe._id}),
+            body: JSON.stringify({ _id: recipe?._id}),
         }).catch((error) => console.log(error))
         
         const data = await res.json();
@@ -52,16 +52,18 @@ export default function OneRecipe({data, preview}) {
 
      return (
         <article className="recipe">
-            <h1>{ recipe.name }</h1>
+            <h1>{ recipe?.name }</h1>
             <button className="like-button" onClick={addLike}>
                 { likes } ❤
             </button>
             <main className="content">
-                <Image src={urlFor(recipe?.mainImage).url()} alt={recipe.name} />
+                {recipe?.mainImage && (
+                <Image src={urlFor(recipe?.mainImage).url()} alt={recipe?.name} width="400" height="400" layout="responsive" objectFit="contain" />
+                )}
                 <div className="breakdown">
                     <ul className="ingredients">
-                        { recipe.ingredient?.map((ingredient)  => (
-                        <li key={ingredient._key} className="ingredient">
+                        { recipe?.ingredient?.map((ingredient)  => (
+                        <li key={ingredient?._key} className="ingredient">
                             { ingredient?.wholeNumber   }
                             { ingredient?.fraction   }
                             {" "}
@@ -71,8 +73,9 @@ export default function OneRecipe({data, preview}) {
                         </li>
                         )) }
                     </ul>
-
-                    <PortableText blocks={recipe?.instructions} className="instruction" />
+                    { recipe?.instructions && (
+                    <PortableText blocks={recipe?.instructions } className="instruction" />
+                    )}
                 </div>
             </main>
         </article>
@@ -87,7 +90,7 @@ export async function getStaticPaths() {
             }
         }`
     )
-    console.log('paths', paths);
+    // console.log('paths', paths);
     return {
         paths,
         fallback: true
